@@ -1,0 +1,114 @@
+.signin-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(to bottom, #B9FDE3, #FC95FC);
+    overflow: hidden; 
+  }
+  
+  .logo {
+    position: absolute;
+    width: 650px;
+    height: 650px;
+    left: 201px;
+    top: 240px;
+    border-radius: 40px;
+  }
+  
+  .email-container, .password-container {
+    position: absolute;
+    width: 450px;
+    height: 30px;
+    padding: 5px;
+  }
+  
+  .email-container {
+    left: 948px;
+    top: 426px;
+  }
+  
+  .password-container {
+    left: 948px;
+    top: 528px;
+  }
+  
+  input {
+    width: 100%;
+    height: 100%;
+    padding: 0.8rem;
+    font-size: 25px;
+    border: 1px solid #cccccc;
+    border-radius: 10px;
+    outline: none;
+  }
+  
+  input:focus {
+    border-color: #007bff;
+  }
+  
+  button {
+    position: absolute;
+    width: 220px;
+    height: 95px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+  }
+  
+  .signup {
+    left: 940px;
+    top: 630px;
+    background-color: #B8FFE3;
+    color: black;
+    font-weight: bold;
+    padding: 17px;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    margin-left: 23px;
+    font-size: 30px;
+    
+  }
+  
+  .signup:hover {
+    background-color: #B8FFE3;
+  }
+  
+  .login {
+    left: 1180px;
+    top: 630px;
+    background-color: #FE94FD;
+    color: black;
+    font-weight: bold;
+    padding: 17px;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 23px;
+    font-size: 30px;
+  }
+  
+  .login:hover {
+    border-color: purple;
+  }
+  
+  .forgot-password {
+    position: absolute;
+    left: 1148px;
+    top: 760px;
+    font-size: 14px;
+    color: black;
+    cursor: pointer;
+  }
+  
+  .forgot-password:hover {
+    text-decoration: underline;
+  }
+  
+  label {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
