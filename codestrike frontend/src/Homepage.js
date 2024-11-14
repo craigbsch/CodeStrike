@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Home, Play, BarChart2, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import './Homepage.css';
+import './homepage.css';
 
 const FriendsList = () => {
   const [friends] = useState([
@@ -85,7 +85,9 @@ const Sidebar = ({ navigate }) => {
   return (
     <div className="sidebar">
       <div className="icon-container">
-        <div className="profile-icon" />
+        <div className="profile-icon">
+          <img src={process.env.PUBLIC_URL + '/codestrike_logo.png'} alt="CodeStrike Logo" />
+        </div>
         {[Home, Play, BarChart2].map((Icon, index) => (
           <button
             key={index}
