@@ -1,6 +1,6 @@
-import './App.css';
+import './Signup.css';
 import React from 'react';
-import Signup from './Signup.js';
+import Signup from './pages/Signup.js';
 import logo from './logo.png';
 
 
