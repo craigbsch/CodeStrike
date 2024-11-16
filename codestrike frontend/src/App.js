@@ -1,7 +1,7 @@
-import './Signup.css';
+import './pages/Signup.css';
 import React from 'react';
 import Signup from './pages/Signup.js';
-import logo from './logo.png';
+import logo from './pages/logo.png';
 
 
 function App() {
