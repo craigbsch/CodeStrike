@@ -1,0 +1,196 @@
+.app-container {
+    display: flex;
+    height: 100vh;
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+  
+  /* Sidebar Styles */
+  .sidebar {
+    width: 240px;
+    background-color: #2b2b3b;
+    border-right: 1px solid #3d3d4d;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .icon-container {
+    padding: 1rem;
+    border-bottom: 1px solid #3d3d4d;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .profile-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1a1a1a;
+    margin-bottom: 20px;
+  }
+  
+  .profile-icon img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+  }
+  
+  .sidebar-icon {
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    padding: 0;
+  }
+  
+  .sidebar-icon:hover {
+    color: #ffffff;
+    background-color: #3d3d4d;
+    border-radius: 4px;
+  }
+  
+  /* Friends Panel Styles */
+  .friends-panel {
+    padding: 1rem;
+    flex: 1;
+  }
+  
+  .friends-panel h2 {
+    color: #ffffff;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+  }
+  
+  .friends-input {
+    width: 100%;
+    padding: 0.5rem;
+    background-color: #3d3d4d;
+    border: none;
+    border-radius: 4px;
+    color: #ffffff;
+    margin-bottom: 1rem;
+  }
+  
+  .friend-item {
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  .friend-item.online {
+    color: #4ade80;
+  }
+  
+  .friend-item.offline {
+    color: #ff1e1e;
+  }
+  
+  /* Main Content Styles */
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #2b2b3b;
+  }
+  
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: #1a1a1a;
+    border-bottom: 1px solid #3d3d4d;
+  }
+  
+  .logout-btn {
+    padding: 0.25rem 1rem;
+    background: none;
+    border: 1px solid #3d3d4d;
+    color: #ffffff;
+    cursor: pointer;
+  }
+  
+  .logout-btn:hover {
+    background-color: #3d3d4d;
+  }
+  
+  /* Code Area Styles */
+  .code-area {
+    flex: 1;
+    padding: 1rem;
+    font-family: 'Consolas', 'Monaco', monospace;
+    line-height: 1.5;
+    background-color: #2b2b3b;
+  }
+  
+  .include-statement {
+    color: #ff1e1e;
+  }
+  
+  .spacer {
+    height: 1rem;
+  }
+  
+  .code-line {
+    color: #ffffff;
+  }
+  
+  .indent {
+    margin-left: 2rem;
+  }
+  
+  .function-play {
+    color: #4ade80;
+    cursor: pointer;
+  }
+  
+  .function-leaderboard {
+    color: #ffd700;
+    cursor: pointer;
+  }
+  
+  .function-account {
+    color: #60a5fa;
+    cursor: pointer;
+  }
+  
+  .comment {
+    color: #6b7280;
+  }
+  
+  /* Terminal Styles */
+  .bottom-bar {
+    padding: 0.5rem 1rem;
+    background-color: #000000;
+    border-top: 1px solid #3d3d4d;
+  }
+  
+  .terminal-prompt {
+    display: flex;
+    align-items: center;
+    color: #6b7280;
+  }
+  
+  .terminal-input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #ffffff;
+    margin-left: 0.5rem;
+    font-family: 'Consolas', 'Monaco', monospace;
+  }
+  
+  .terminal-input:focus {
+    outline: none;
+  }
