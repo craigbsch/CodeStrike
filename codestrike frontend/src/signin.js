@@ -13,7 +13,7 @@ const SignIn = () => {
   return (
     <div className="signin-container">
       {/* Logo */}
-      <img src="logo.png" alt="Logo" className="logo" />
+      <img src="codestrike_logo.png" alt="Logo" className="codestrike_logo" />
       
       {/* Email Address */}
       <div className="email-container">
