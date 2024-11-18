@@ -1,0 +1,104 @@
+body {
+  margin: 0;
+  background: linear-gradient(to bottom, #B9FDE3, #FC95FC);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.App {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: 100px;
+}
+
+.App-logo {
+  height: 45vmin;
+  pointer-events: none;
+  border-radius: 40px;
+}
+
+.signup-container {
+  max-width: 500px;
+  padding: 20px;
+  text-align: center;
+}
+
+.App-header {
+  align-items: center;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  font-size: 1.2em;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.signup-btn {
+  width: 50%;
+  padding: 17px;
+  border: none;
+  border-radius: 40px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 23px;
+  font-size: 1.2em;
+  color: rgb(0, 0, 0);
+}
+
+.primary-btn {
+  background-color: #B9FDE3;
+}
+
+.secondary-btn {
+  background-color: #FC95FC; 
+}
+
+.signup-btn:hover {
+  opacity: 0.9;
+}
+
+.error {
+  color: red;
+  font-size: 0.875em;
+}
+
+.success-message {
+  margin-bottom: 15px;
+  color: green;
+  font-weight: bold;
+}
