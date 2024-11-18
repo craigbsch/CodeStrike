@@ -5,7 +5,7 @@ import Splash from './splashpage/Splash.js';
 function App() {
   return (
     <div>
-      <Splash /> {/* Render the new Page component */}
+      <Splash />
     </div>
   );
 }
