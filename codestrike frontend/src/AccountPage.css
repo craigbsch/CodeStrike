@@ -58,7 +58,7 @@
   }
   
   .delete-account {
-    background-color: #FC95FC;
+    background-color: #9efbd7;
     color: white;
     padding: 12px 24px;
     border: none;
@@ -67,13 +67,5 @@
     cursor: pointer;
     transition: background-color 0.3s;
     margin-top: 20px;
-  }
-  
-  .delete-account:hover {
-    background-color: #B9FDE3;
-  }
-  
-  .delete-account:active {
-    background-color: #d077d0;
   }
   
