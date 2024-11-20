@@ -1,0 +1,71 @@
+/* AccountPage.css */
+
+.account-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(to bottom, #B9FDE3, #FC95FC); /* Gradient background */
+    font-family: Arial, sans-serif;
+    color: #333;
+  }
+  
+  .profile-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 4px solid #FC95FC;
+    margin-bottom: 30px;
+    background-image: url('https://via.placeholder.com/120'); /* Default profile image (replace as needed) */
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .account-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .input-group {
+    margin-bottom: 20px;
+  }
+  
+  .input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .input-group input {
+    width: 250px;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  
+  .input-group input:focus {
+    border-color: #FC95FC;
+  }
+  
+  .delete-account {
+    background-color: #9efbd7;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+  }
+  
