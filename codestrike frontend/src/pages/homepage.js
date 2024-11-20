@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Play, BarChart2, User } from 'lucide-react';
+import { Home, Play, BarChart2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './homepage.css';
 
@@ -12,6 +12,13 @@ const FriendsList = () => {
     { id: 5, name: "Friend 5", online: false }
   ]);
 
+  // Sort friends with online friends first
+  const sortedFriends = [...friends].sort((a, b) => {
+    if (a.online && !b.online) return -1;
+    if (!a.online && b.online) return 1;
+    return 0;
+  });
+
   return (
     <div className="friends-panel">
       <h2>Friends</h2>
@@ -21,7 +28,7 @@ const FriendsList = () => {
         placeholder="Add Friends..."
       />
       <div className="friends-list">
-        {friends.map((friend) => (
+        {sortedFriends.map((friend) => (
           <div 
             key={friend.id} 
             className={`friend-item ${friend.online ? 'online' : 'offline'}`}
@@ -85,18 +92,20 @@ const Sidebar = ({ navigate }) => {
   return (
     <div className="sidebar">
       <div className="icon-container">
-        <div className="profile-icon">
+        <div 
+          className="profile-icon"
+          onClick={() => navigate('/account')}
+          style={{ cursor: 'pointer' }}
+          title="Account"
+        >
           <img src={process.env.PUBLIC_URL + '/codestrike_logo.png'} alt="CodeStrike Logo" />
         </div>
-        {[Home, Play, BarChart2].map((Icon, index) => (
-          <button
-            key={index}
-            className="sidebar-icon"
-            onClick={() => navigate(['/', '/play', '/leaderboard'][index])}
-          >
-            <Icon />
-          </button>
-        ))}
+        <button className="sidebar-icon" onClick={() => navigate('/play')}>
+          <Play />
+        </button>
+        <button className="sidebar-icon" onClick={() => navigate('/leaderboard')}>
+          <BarChart2 />
+        </button>
       </div>
       <FriendsList />
     </div>
