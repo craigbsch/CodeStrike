@@ -3,13 +3,16 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import Homepage from './pages/homepage';
-import { BrowserRouter } from 'react-router-dom';
 import Signup from './pages/Signup';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
-    <Signup />
+    <Routes>
+      <Route path="/" element={<Signup />} />
+      <Route path="/homepage" element={<Homepage />} /> 
+    </Routes>
   </BrowserRouter>
 );
 
