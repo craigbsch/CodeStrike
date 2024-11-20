@@ -47,61 +47,63 @@ function Signup() {
     };
 
     return (
-        <div className="App">
-            <header className="App-header">
-                <div className="container">
-                    <img src={logo} className="App-logo" alt="logo" />
+        <div className="signup-page">
+            <div className="App">
+                <header className="App-header">
+                    <div className="container">
+                        <img src={logo} className="App-logo" alt="logo" />
+                    </div>
+                </header>
+                <div className="signup-container">
+                    <h1>Create Your CodeStrike Go Account</h1>
+                    {submitted && <div className="success-message">Signup successful!</div>}
+                    <form onSubmit={handleSignup} noValidate>
+                        <div className="form-group">
+                            <input
+                                type="text"
+                                placeholder="Name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
+                            {errors.name && <p className="error">{errors.name}</p>}
+                        </div>
+                        <div className="form-group">
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                            {errors.email && <p className="error">{errors.email}</p>}
+                        </div>
+                        <div className="form-group">
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                            {errors.password && <p className="error">{errors.password}</p>}
+                        </div>
+                        <div className="form-group">
+                            <input
+                                type="password"
+                                placeholder="Confirm Password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
+                            />
+                            {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
+                        </div>
+                        <div className="button-group">
+                            <button type="submit" className="signup-btn primary-btn">Sign Up</button>
+                            <button type="button" onClick={handleSignin} className="signup-btn secondary-btn">Login</button>
+                        </div>
+                    </form>
                 </div>
-            </header>
-            <div className="signup-container">
-                <h1>Create Your CodeStrike Go Account</h1>
-                {submitted && <div className="success-message">Signup successful!</div>}
-                <form onSubmit={handleSignup} noValidate>
-                    <div className="form-group">
-                        <input
-                            type="text"
-                            placeholder="Name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                        />
-                        {errors.name && <p className="error">{errors.name}</p>}
-                    </div>
-                    <div className="form-group">
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                        {errors.email && <p className="error">{errors.email}</p>}
-                    </div>
-                    <div className="form-group">
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                        {errors.password && <p className="error">{errors.password}</p>}
-                    </div>
-                    <div className="form-group">
-                        <input
-                            type="password"
-                            placeholder="Confirm Password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                        />
-                        {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
-                    </div>
-                    <div className="button-group">
-                        <button type="submit" className="signup-btn primary-btn">Sign Up</button>
-                        <button type="button" onClick={handleSignin} className="signup-btn secondary-btn">Login</button>
-                    </div>
-                </form>
             </div>
         </div>
     );

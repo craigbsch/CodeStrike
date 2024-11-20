@@ -6,12 +6,14 @@ import Homepage from './pages/homepage';
 import Signup from './pages/Signup';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Signin from './pages/signin';
+import Splash from './pages/Splash';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Signup />} /> 
+      <Route path="/" element={<Splash />} /> 
+      <Route path="/splash" element={<Signup />} />
       <Route path="/homepage" element={<Homepage />} /> 
       <Route path="/signin" element={<Signin />} /> 
     </Routes>
