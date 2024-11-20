@@ -5,13 +5,15 @@ import reportWebVitals from './reportWebVitals';
 import Homepage from './pages/homepage';
 import Signup from './pages/Signup';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Signin from './pages/signin';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Signup />} />
+      <Route path="/" element={<Signup />} /> 
       <Route path="/homepage" element={<Homepage />} /> 
+      <Route path="/signin" element={<Signin />} /> 
     </Routes>
   </BrowserRouter>
 );

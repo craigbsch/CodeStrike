@@ -46,14 +46,6 @@
     border-color: #007bff;
   }
   
-  button {
-    position: absolute;
-    width: 220px;
-    height: 95px;
-    cursor: pointer;
-    border: none;
-    border-radius: 4px;
-  }
   
   .signup {
     left: 940px;
