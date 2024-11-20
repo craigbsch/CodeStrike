@@ -6,14 +6,6 @@ const AccountPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  //handles account deletion
-  const handleDeleteAccount = () => {
-    if (window.confirm('Are you sure you want to delete your account?')) {
-      //insert code for deleting account
-      alert('Account deleted');
-    }
-  };
-
   return (
     <div className="account-page">
       <div className="profile-circle"></div>
