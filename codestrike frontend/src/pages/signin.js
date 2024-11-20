@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
 import './signin.css'; 
+import { useNavigate } from 'react-router-dom';
+
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Sign-in attempt:', { email, password });
+    navigate('/signup');
+  };
+
+  const handleSignup = () => {
+    navigate('/homepage');
   };
 
   return (
@@ -41,8 +50,8 @@ const SignIn = () => {
         </div>
         
         {/* Sign Up and Login buttons */}
-        <button className="signup">SIGN UP</button>
-        <button className="login">LOGIN</button>
+        <button onClick={handleSubmit} className="signup">SIGN UP</button>
+        <button onClick={handleSignup} className="login">LOGIN</button>
 
         {/* Forgot Password */}
         <span className="forgot-password">Forgot Password?</span>
