@@ -72,6 +72,7 @@
     margin-left: 23px;
     font-size: 1.2em;
     color: rgb(0, 0, 0);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   .primary-btn {
@@ -83,7 +84,9 @@
   }
 
   .signup-btn:hover {
-    opacity: 0.9;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0.95;
   }
 
   .error {
