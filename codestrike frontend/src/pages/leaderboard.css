@@ -23,7 +23,7 @@ body {
 }
 
 .sidebar {
-  width: 64px;
+  width: 32px;
   background-color: #2b2b3b;
   border-right: 1px solid #3d3d4d;
   display: flex;

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Home, Play, BarChart2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import {Play, BarChart2, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './homepage.css';
 
@@ -58,9 +58,11 @@ const CodeEditor = ({ navigate }) => {
         >
           Play()
         </span>
-        <span className="comment"> //start a Ranked Match</span>
+        <span className="comment">//start a Ranked Match</span>
       </div>
-      <div className="code-line">for (int i = 0; i {'<'} 10; i++) {'{'}</div>
+      <div className="code-line">
+        for (int i = 0; i {'<'} 10; i++) {'{'}
+      </div>
       <div className="code-line indent">
         <span 
           className="function-leaderboard"
@@ -68,12 +70,16 @@ const CodeEditor = ({ navigate }) => {
         >
           Leaderboard()
         </span>
-        <span className="comment"> //access the leaderboard and see where you rank</span>
+        <span className="comment">//access the leaderboard and see where you rank</span>
       </div>
       <div className="code-line">{'}'}</div>
       <div className="spacer" />
-      <div className="code-line">int x = 0;</div>
-      <div className="code-line">while (x != 3) {'{'}</div>
+      <div className="code-line">
+        int x = 0;
+      </div>
+      <div className="code-line">
+        while (x != 3) {'{'}
+      </div>
       <div className="code-line indent">
         <span 
           className="function-account"
@@ -81,7 +87,7 @@ const CodeEditor = ({ navigate }) => {
         >
           Account()
         </span>
-        <span className="comment"> //access your profile/account</span>
+        <span className="comment">//access your profile/account</span>
       </div>
       <div className="code-line">{'}'}</div>
     </div>
@@ -94,7 +100,7 @@ const Sidebar = ({ navigate }) => {
       <div className="icon-container">
         <div 
           className="profile-icon"
-          onClick={() => navigate('/account')}
+          onClick={() => navigate('/homepage')}
           style={{ cursor: 'pointer' }}
           title="Account"
         >
@@ -106,6 +112,9 @@ const Sidebar = ({ navigate }) => {
         <button className="sidebar-icon" onClick={() => navigate('/leaderboard')}>
           <BarChart2 />
         </button>
+        <button className="sidebar-icon" onClick={() => navigate('/account')}>
+          <User />
+        </button>
       </div>
       <FriendsList />
     </div>
@@ -114,16 +123,23 @@ const Sidebar = ({ navigate }) => {
 
 const Terminal = () => {
   const [input, setInput] = useState('');
+  const inputRef = useRef(null);
+  
+  const handleTerminalClick = () => {
+    inputRef.current?.focus();
+  };
   
   return (
-    <div className="bottom-bar">
+    <div className="bottom-bar" onClick={handleTerminalClick}>
       <div className="terminal-prompt">
-        <span>username@</span>
-        <input
-          type="text"
+        <div className="prompt-text">username@</div>
+        <textarea
+          ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           className="terminal-input"
+          spellCheck="false"
+          rows={1}
         />
       </div>
     </div>
