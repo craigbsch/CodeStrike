@@ -11,8 +11,11 @@ const Leaderboard = () => {
     { id: 1, username: "User134", elo: 1324 },
     { id: 2, username: "User827", elo: 1320 },
     { id: 3, username: "User743", elo: 1314 },
+    { id: 4, username: "User445", elo: 1290 },
+    { id: 5, username: "User921", elo: 1275 },
     { id: 49, username: "You", elo: 1024 },
     { id: 50, username: "User73823", elo: 1001 },
+    { id: 51, username: "User552", elo: 985 },
     { id: 1032, username: "User****", elo: 0 },
   ];
 
@@ -72,7 +75,6 @@ const Leaderboard = () => {
               </div>
             ))}
           </div>
-          <div className="ellipsis">⋮</div>
         </div>
       </div>
     </div>

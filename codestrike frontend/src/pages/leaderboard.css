@@ -223,11 +223,3 @@ h1 {
   margin-right: 16px;
   flex: 1;
 }
-
-.ellipsis {
-  color: white;
-  text-align: center;
-  font-size: 24px;
-  margin: 8px 0;
-  flex-shrink: 0;
-}
