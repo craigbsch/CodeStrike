@@ -50,6 +50,8 @@
 
 .profile-icon:hover {
   background-color: #3d3d4d;
+  transform: scale(1.1);
+  transition: all 0.2s ease-in-out;
 }
 
 .profile-icon img {
@@ -76,6 +78,8 @@
 
 .sidebar-icon:hover {
   background-color: #3d3d4d;
+  transform: scale(1.1);
+  transition: all 0.2s ease-in-out;
 }
 
 /* Friends Panel Styles */
