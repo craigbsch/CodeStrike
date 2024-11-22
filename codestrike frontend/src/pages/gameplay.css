@@ -262,3 +262,49 @@ h2 {
 .editor-content .cm-focused .cm-activeLine {
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.run-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.run-btn:hover {
+  background-color: #45a049;
+  transform: scale(1.1);
+}
+
+.run-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.run-btn::before {
+  content: "▶";
+  font-size: 12px;
+}
+
+.console-content pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: #ffffff;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+}
