@@ -40,7 +40,102 @@ const Gameplay = () => {
     setCode(value);
   }, []);
 
-  const run_code=()=>{}
+  const run_code = async () => {
+    setIsCodeRunning(true);
+    setOutput('Executing code...');
+
+    try {
+      // Using the exact endpoint from RapidAPI documentation
+      const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'accept': 'application/json',
+          'X-RapidAPI-Key': process.env.REACT_APP_RAPID_API_KEY,
+          'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+        },
+        body: JSON.stringify({
+          source_code: code,
+          language_id: 71,
+          stdin: '',
+          expected_output: null,
+          memory_limit: null,
+          time_limit: null
+        })
+      });
+
+      // Detailed logging
+      console.log('Request URL:', 'https://judge0-ce.p.rapidapi.com/submissions');
+      console.log('Request headers:', {
+        'content-type': 'application/json',
+        'accept': 'application/json',
+        'X-RapidAPI-Key': 'b2bb...', // truncated for security
+        'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+      });
+      console.log('Response status:', submitResponse.status);
+      console.log('Response headers:', Object.fromEntries(submitResponse.headers));
+
+      if (!submitResponse.ok) {
+        const errorText = await submitResponse.text();
+        console.error('Error response body:', errorText);
+        throw new Error(`API Error (${submitResponse.status}): ${errorText}`);
+      }
+
+      const token = await submitResponse.json();
+      console.log('Submission token:', token);
+
+      // Get the results
+      const resultResponse = await fetch(`https://judge0-ce.p.rapidapi.com/submissions/${token.token}`, {
+        method: 'GET',
+        headers: {
+          'X-RapidAPI-Key': process.env.REACT_APP_RAPID_API_KEY,
+          'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+        }
+      });
+
+      if (!resultResponse.ok) {
+        throw new Error('Failed to get results');
+      }
+
+      const result = await resultResponse.json();
+      console.log('Final result:', result);
+
+      // Format the output
+      let outputText = '';
+      
+      if (result.compile_output) {
+        outputText += `Compilation Output:\n${result.compile_output}\n`;
+      }
+      
+      if (result.stderr) {
+        outputText += `Error:\n${result.stderr}\n`;
+      }
+      
+      if (result.stdout) {
+        outputText += `Output:\n${result.stdout}\n`;
+      }
+
+      if (result.time) {
+        outputText += `\nExecution Time: ${result.time}s`;
+      }
+      
+      if (result.memory) {
+        outputText += `\nMemory Used: ${Math.round(result.memory / 1024)} KB`;
+      }
+
+      if (!outputText) {
+        outputText = 'No output generated.';
+      }
+
+      setOutput(outputText);
+
+    } catch (error) {
+      console.error('Full error:', error);
+      setOutput(`Error: ${error.message}\nPlease try again.`);
+    } finally {
+      setIsCodeRunning(false);
+    }
+  };
 
   return (
     <div className="gameplay-container">
