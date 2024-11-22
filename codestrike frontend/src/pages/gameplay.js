@@ -9,20 +9,22 @@ const Gameplay = () => {
   const navigate = useNavigate();
   const matchTime = 210;
   const [time, setTime] = useState(matchTime);
-  const [isRunning, setIsRunning] = useState(true);
+  const [isTimerRunning, setIsTimerRunning] = useState(true);
+  const [isCodeRunning, setIsCodeRunning] = useState(false);
   const rivalUser = "User438";
   const warningTime = 30;
   const [code, setCode] = useState('# Write your Python code here\n');
+  const [output, setOutput] = useState('');
 
   useEffect(() => {
     let timer;
-    if (isRunning && time > 0) {
+    if (isTimerRunning && time > 0) {
       timer = setInterval(() => {
         setTime((prevTime) => prevTime - 1);
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [isRunning, time]);
+  }, [isTimerRunning, time]);
 
   const formatTime = (seconds) => {
     const hrs = Math.floor(seconds / 3600);
@@ -37,6 +39,8 @@ const Gameplay = () => {
   const onChange = React.useCallback((value, viewUpdate) => {
     setCode(value);
   }, []);
+
+  const run_code=()=>{}
 
   return (
     <div className="gameplay-container">
@@ -75,7 +79,16 @@ const Gameplay = () => {
         </div>
 
         <div className="code-editor">
-          <h2>Code Editor</h2>
+          <div className="editor-header">
+            <h2>Code Editor</h2>
+            <button 
+              className="run-btn" 
+              onClick={run_code}
+              disabled={isCodeRunning}
+            >
+              {isCodeRunning ? 'Running...' : 'Run Code'}
+            </button>
+          </div>
           <div className="editor-content">
             <CodeMirror
               value={code}
@@ -116,7 +129,7 @@ const Gameplay = () => {
         <div className="console-section">
           <h2>Console</h2>
           <div className="console-content">
-            {/* Add your console content here */}
+            <pre>{output}</pre>
           </div>
         </div>
       </div>
