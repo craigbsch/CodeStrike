@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CodeMirror from '@uiw/react-codemirror';
+import { python } from '@codemirror/lang-python';
+import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import './gameplay.css';
 
 const Gameplay = () => {
@@ -9,6 +12,7 @@ const Gameplay = () => {
   const [isRunning, setIsRunning] = useState(true);
   const rivalUser = "User438";
   const warningTime = 30;
+  const [code, setCode] = useState('# Write your Python code here\n');
 
   useEffect(() => {
     let timer;
@@ -29,6 +33,10 @@ const Gameplay = () => {
 
   const progressPercentage = (time / 210) * 100;
   const isTimeWarning = time <= warningTime;
+
+  const onChange = React.useCallback((value, viewUpdate) => {
+    setCode(value);
+  }, []);
 
   return (
     <div className="gameplay-container">
@@ -69,7 +77,39 @@ const Gameplay = () => {
         <div className="code-editor">
           <h2>Code Editor</h2>
           <div className="editor-content">
-            {/* Add your code editor component here */}
+            <CodeMirror
+              value={code}
+              height="100%"
+              theme={vscodeDark}
+              extensions={[python()]}
+              onChange={onChange}
+              basicSetup={{
+                lineNumbers: true,
+                highlightActiveLineGutter: true,
+                highlightSpecialChars: true,
+                history: true,
+                foldGutter: true,
+                drawSelection: true,
+                dropCursor: true,
+                allowMultipleSelections: true,
+                indentOnInput: true,
+                syntaxHighlighting: true,
+                bracketMatching: true,
+                closeBrackets: true,
+                autocompletion: true,
+                rectangularSelection: true,
+                crosshairCursor: true,
+                highlightActiveLine: true,
+                highlightSelectionMatches: true,
+                closeBracketsKeymap: true,
+                defaultKeymap: true,
+                searchKeymap: true,
+                historyKeymap: true,
+                foldKeymap: true,
+                completionKeymap: true,
+                lintKeymap: true,
+              }}
+            />
           </div>
         </div>
 
