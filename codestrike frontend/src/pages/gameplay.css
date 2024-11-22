@@ -232,3 +232,33 @@ h2 {
 .console-content::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.5);
 }
+
+/* Update editor content styles */
+.editor-content {
+  height: calc(100% - 40px); /* Adjust for heading */
+  border-radius: 4px;
+  overflow: hidden; /* Ensure CodeMirror stays within bounds */
+}
+
+/* Style CodeMirror container */
+.editor-content .cm-editor {
+  height: 100%;
+  font-size: 14px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+}
+
+/* Ensure proper padding */
+.editor-content .cm-scroller {
+  padding: 10px 0;
+}
+
+/* Style the gutter */
+.editor-content .cm-gutters {
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: transparent;
+}
+
+/* Style active line */
+.editor-content .cm-focused .cm-activeLine {
+  background-color: rgba(255, 255, 255, 0.1);
+}
