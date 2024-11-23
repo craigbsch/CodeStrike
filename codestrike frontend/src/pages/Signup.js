@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import logo from './logo.png';
 import './Signup.css';
 import { useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../firebase/firebase';
+import { setDoc, doc } from 'firebase/firestore';
 
 function Signup() {
     const [name, setName] = useState('');
@@ -25,8 +28,24 @@ function Signup() {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSignup = (e) => {
+    const handleSignup = async (e) => {
         e.preventDefault();
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            const user = auth.currentUser;
+            console.log(user);
+            if (user) {
+                await setDoc(doc(db, "Users", user.uid), {
+                    email: user.email,
+                    userName: user.name,
+                });
+            }
+            console.log("User registered successfully!!!");
+            
+        } catch (error) {
+            console.log(error.message);
+            
+        }
         if (validateForm()) {
             setSubmitted(true);
             console.log('Form submitted successfully:', { name, email, password });
