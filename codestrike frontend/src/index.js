@@ -8,6 +8,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Signin from './pages/signin';
 import Splash from './pages/Splash';
 import AccountPage from './pages/AccountPage';
+import Leaderboard from './pages/leaderboard';
+import Gameplay from './pages/gameplay';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
   root.render(  
@@ -18,6 +20,8 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
       <Route path="/homepage" element={<Homepage />} /> 
       <Route path="/account" element={<AccountPage />} />
       <Route path="/signin" element={<Signin />} />
+      <Route path="/leaderboard" element={<Leaderboard/>} />
+      <Route path="/play" element={<Gameplay/>} />
     </Routes>
   </BrowserRouter>
 );

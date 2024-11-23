@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import './signin.css'; 
+import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/firebase';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,6 +19,11 @@ const SignIn = () => {
       
     }
     console.log('Sign-in attempt:', { email, password });
+    navigate('/signup');
+  };
+
+  const handleSignup = () => {
+    navigate('/homepage');
   };
 
   return (
@@ -49,8 +57,8 @@ const SignIn = () => {
         </div>
         
         {/* Sign Up and Login buttons */}
-        <button className="signup">SIGN UP</button>
-        <button className="login">LOGIN</button>
+        <button onClick={handleSubmit} className="signup">SIGN UP</button>
+        <button onClick={handleSignup} className="login">LOGIN</button>
 
         {/* Forgot Password */}
         <span className="forgot-password">Forgot Password?</span>

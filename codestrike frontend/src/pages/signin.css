@@ -68,11 +68,14 @@
     cursor: pointer;
     margin-left: 23px;
     font-size: 30px;
-    
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   
   .signup:hover {
     background-color: #B8FFE3;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0.95;
   }
   
   .login {
@@ -92,6 +95,9 @@
   
   .login:hover {
     border-color: purple;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0.95;
   }
   
   .forgot-password {
