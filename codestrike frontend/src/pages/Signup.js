@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import logo from './logo.png';
 import './Signup.css';
 import { useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../firebase/firebase';
+import { setDoc, doc } from 'firebase/firestore';
 
 function Signup() {
     const [name, setName] = useState('');
@@ -25,20 +28,51 @@ function Signup() {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSignup = (e) => {
+    const handleSignup = async (e) => {
         e.preventDefault();
-        if (validateForm()) {
+        
+        // First validate the form
+        if (!validateForm()) {
+            return;
+        }
+
+        try {
+            // Create user in Firebase Authentication
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Create user document in Firestore
+            await setDoc(doc(db, "Users", user.uid), {
+                userName: name,
+                email: email,
+                createdAt: new Date(),
+                // You can add more initial user fields here
+            });
+
+            console.log("User registered successfully!!!");
+            
             setSubmitted(true);
-            console.log('Form submitted successfully:', { name, email, password });
             setName('');
             setEmail('');
             setPassword('');
             setConfirmPassword('');
             setErrors({});
+
+            // Navigate after a short delay
             setTimeout(() => {
                 setSubmitted(false);
                 navigate('/homepage'); 
             }, 1000);
+
+        } catch (error) {
+            console.error("Signup Error:", error);
+            
+            // Handle specific Firebase errors
+            if (error.code === 'auth/email-already-in-use') {
+                setErrors({email: 'Email is already in use'});
+            } else {
+                alert('Signup failed. Please try again.');
+            }
         }
     };
 
