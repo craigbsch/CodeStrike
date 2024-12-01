@@ -30,34 +30,49 @@ function Signup() {
 
     const handleSignup = async (e) => {
         e.preventDefault();
+        
+        // First validate the form
+        if (!validateForm()) {
+            return;
+        }
+
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
-            const user = auth.currentUser;
-            console.log(user);
-            if (user) {
-                await setDoc(doc(db, "Users", user.uid), {
-                    email: user.email,
-                    userName: user.name,
-                });
-            }
+            // Create user in Firebase Authentication
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Create user document in Firestore
+            await setDoc(doc(db, "Users", user.uid), {
+                userName: name,
+                email: email,
+                createdAt: new Date(),
+                // You can add more initial user fields here
+            });
+
             console.log("User registered successfully!!!");
             
-        } catch (error) {
-            console.log(error.message);
-            
-        }
-        if (validateForm()) {
             setSubmitted(true);
-            console.log('Form submitted successfully:', { name, email, password });
             setName('');
             setEmail('');
             setPassword('');
             setConfirmPassword('');
             setErrors({});
+
+            // Navigate after a short delay
             setTimeout(() => {
                 setSubmitted(false);
                 navigate('/homepage'); 
             }, 1000);
+
+        } catch (error) {
+            console.error("Signup Error:", error);
+            
+            // Handle specific Firebase errors
+            if (error.code === 'auth/email-already-in-use') {
+                setErrors({email: 'Email is already in use'});
+            } else {
+                alert('Signup failed. Please try again.');
+            }
         }
     };
 
