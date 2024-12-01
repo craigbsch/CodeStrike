@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
@@ -7,6 +7,7 @@ import ConfirmationModal from './SubmitModal';
 import './gameplay.css';
 
 const Gameplay = () => {
+  const { matchId } = useParams();
   const navigate = useNavigate();
   const matchTime = 210;
   const [time, setTime] = useState(matchTime);
@@ -124,6 +125,8 @@ const Gameplay = () => {
     }
   };
 
+  const problemDescription = `Problem ${matchId}`;
+
   return (
     <div className="gameplay-container">
       <div className="header">
@@ -154,7 +157,7 @@ const Gameplay = () => {
 
       <div className="gameplay-main-content">
         <div className="problem-description">
-          <h2>Problem Description</h2>
+          <h2>{problemDescription}</h2>
           <div className="description-content">
             {/* Add your problem description content here */}
           </div>
