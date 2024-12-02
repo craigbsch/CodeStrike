@@ -89,7 +89,9 @@ function Signup() {
                     </div>
                 </header>
                 <div className="signup-container">
-                    <h1>Create Your CodeStrike Go Account</h1>
+                    <header>
+                        <p>Create Your CodeStrike Go Account</p>
+                    </header>
                     {submitted && <div className="success-message">Signup successful!</div>}
                     <form onSubmit={handleSignup} noValidate>
                         <div className="form-group">
