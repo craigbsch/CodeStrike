@@ -110,11 +110,9 @@ const AccountPage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Get the current authenticated user
         const currentUser = auth.currentUser;
         
         if (currentUser) {
-          // Fetch additional user data from Firestore
           const userDocRef = doc(db, "Users", currentUser.uid);
           const userDoc = await getDoc(userDocRef);
           
@@ -136,20 +134,16 @@ const AccountPage = () => {
     fetchUserData();
   }, []);
 
-  //handles account deletion
   const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to delete your account?')) {
       try {
         const currentUser = auth.currentUser;
         
-        // Delete user document from Firestore
         const userDocRef = doc(db, "Users", currentUser.uid);
         await deleteDoc(userDocRef);
         
-        // Delete the authentication account
         await currentUser.delete();
         
-        // Redirect to login or home page
         navigate('/');
       } catch (error) {
         console.error("Error deleting account:", error);
