@@ -7,6 +7,13 @@
     min-height: 100vh;
   }
 
+  header p {
+    font-size: 2rem;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+
   .container {
     display: flex;
     align-items: center;
