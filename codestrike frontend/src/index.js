@@ -12,18 +12,20 @@ import Leaderboard from './pages/leaderboard';
 import Gameplay from './pages/gameplay';
 import VictoryPage from './pages/VictoryPage'
 import LossPage from './pages/LossPage';
+import Lobby from './pages/Lobby';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
   root.render(  
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<VictoryPage />} /> 
+      <Route path="/" element={<Splash />} /> 
       <Route path="/signup" element={<Signup />} />
       <Route path="/homepage" element={<Homepage />} /> 
       <Route path="/account" element={<AccountPage />} />
       <Route path="/signin" element={<Signin />} />
       <Route path="/leaderboard" element={<Leaderboard/>} />
-      <Route path="/play" element={<Gameplay/>} />
+      <Route path="/play" element={<Lobby />} />
+      <Route path="/gameplay/:matchId" element={<Gameplay />} />
     </Routes>
   </BrowserRouter>
 );
