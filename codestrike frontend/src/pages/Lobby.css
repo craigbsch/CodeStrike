@@ -7,21 +7,19 @@
   text-align: center;
 }
 
-.lobby-container .lobby-text-h1 { /* Updated selector to apply to .lobby-text within .lobby-container */
+.lobby-container .lobby-text-h1 {
   font-size: 2em;
   font-weight: bold;
   color: black;
   margin-bottom: 20px;
 }
 
-.lobby-container .lobby-text-h2 { /* Updated selector to apply to .lobby-text within .lobby-container */
+.lobby-container .lobby-text-h2 {
   font-size: 1.5em;
   font-weight: bold;
   color: black;
   margin-bottom: 20px;
 }
-
-/* Removed existing h1 styles as requested */
 
 .create-match-btn, .join-match-btn {
   width: 300px;
@@ -33,7 +31,7 @@
   font-size: 1.2em;
   color: black;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  margin: 10px 0;
+  margin: 20px 0;
 }
 
 .create-match-btn {
@@ -56,6 +54,6 @@ input {
   border: 1px solid #cccccc;
   border-radius: 4px;
   font-size: 1.2em;
-  margin: 10px 0;
+  margin: 20px 0;
 }
 
