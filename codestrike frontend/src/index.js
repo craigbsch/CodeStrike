@@ -10,6 +10,8 @@ import Splash from './pages/Splash';
 import AccountPage from './pages/AccountPage';
 import Leaderboard from './pages/leaderboard';
 import Gameplay from './pages/gameplay';
+import VictoryPage from './pages/VictoryPage'
+import LossPage from './pages/LossPage';
 import Lobby from './pages/Lobby';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
