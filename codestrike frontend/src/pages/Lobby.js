@@ -29,10 +29,10 @@ const Lobby = () => {
 
   return (
     <div className="lobby-container">
-      <h1>Lobby</h1>
+      <div className="lobby-text-h1">Lobby</div>
       <button className="create-match-btn" onClick={createMatch}>Create New Match</button>
       {isCreatingMatch && <p>Your Match ID: {matchId}</p>}
-      <h2>Or Join Existing Match</h2>
+      <div className="lobby-text-h2">Or Join Existing Match</div>
       <input
         type="text"
         placeholder="Enter Match ID"
@@ -47,3 +47,4 @@ const Lobby = () => {
 };
 
 export default Lobby;
+
