@@ -10,12 +10,14 @@ import Splash from './pages/Splash';
 import AccountPage from './pages/AccountPage';
 import Leaderboard from './pages/leaderboard';
 import Gameplay from './pages/gameplay';
+import VictoryPage from './pages/VictoryPage'
+import LossPage from './pages/LossPage';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
   root.render(  
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Splash />} /> 
+      <Route path="/" element={<LossPage />} /> 
       <Route path="/signup" element={<Signup />} />
       <Route path="/homepage" element={<Homepage />} /> 
       <Route path="/account" element={<AccountPage />} />
