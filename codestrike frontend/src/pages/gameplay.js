@@ -4,12 +4,13 @@ import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import ConfirmationModal from './SubmitModal';
+import useLocalStorage  from './hooks/useLocalStorage';
 import './gameplay.css';
 
 const Gameplay = () => {
   const { matchId } = useParams();
   const matchTime = 20;
-  const [time, setTime] = useState(matchTime);
+  const [time, setTime] = useLocalStorage(`matchTime-${matchId}`, matchTime);
   const [isCodeRunning, setIsCodeRunning] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [code, setCode] = useState('# Write your Python code here\n');
