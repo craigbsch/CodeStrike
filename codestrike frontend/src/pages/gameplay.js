@@ -4,13 +4,14 @@ import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import ConfirmationModal from './SubmitModal';
+import useLocalStorage  from './hooks/useLocalStorage';
 import './gameplay.css';
 
 const Gameplay = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
   const matchTime = 210;
-  const [time, setTime] = useState(matchTime);
+  const [time, setTime] = useLocalStorage(`matchTime-${matchId}`, matchTime);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const [isCodeRunning, setIsCodeRunning] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,7 +28,7 @@ const Gameplay = () => {
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [isTimerRunning, time]);
+  }, [isTimerRunning, time,setTime]);
 
   const formatTime = (seconds) => {
     const hrs = Math.floor(seconds / 3600);
