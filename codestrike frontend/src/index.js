@@ -24,7 +24,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
       <Route path="/leaderboard" element={<Leaderboard/>} />
       <Route path="/play" element={<Lobby />} />
       <Route path="/gameplay/:matchId" element={<Gameplay />} />
-    </Routes>
+      </Routes>
   </BrowserRouter>
 );
 
