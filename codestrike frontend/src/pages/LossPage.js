@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const LossPage = () => {
   return (
+    <div className="loss-page-wrapper">
     <div className="loss-page">
       <div className="loss-container">
         <h1 className="loss-title">Try Again Next Time!</h1>
@@ -12,6 +13,7 @@ const LossPage = () => {
         <button className="loss-button">Continue</button>
       </div>
     </div>
+  </div>
   );
 };
 
