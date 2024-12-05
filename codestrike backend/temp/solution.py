@@ -1,1 +1,5 @@
-print(int(input())**2)
+def solution(x):
+# Write your code here
+  print(x**2)
+  pass
+    

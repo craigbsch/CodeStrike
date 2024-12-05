@@ -13,12 +13,37 @@ const Gameplay = () => {
   const [time, setTime] = useLocalStorage(`matchTime-${matchId}`, matchTime);
   const [isCodeRunning, setIsCodeRunning] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [code, setCode] = useState('# Write your Python code here\n');
+  const [question, setQuestion] = useState(null);
+  const [testCases, setTestCases] = useState([]);
+  const [userAResults, setUserAResults] = useState(null);
+  const [userBResults, setUserBResults] = useState(null);
+
+  const [code, setCode] = useState(`def solution(x):
+# Write your code here
+  pass
+    `);
   const [output, setOutput] = useState('');
   const [isEditorDisabled, setIsEditorDisabled] = useState(false); // Disable editor after submission
   const [results, setResults] = useState(null); // Store match results
   const rivalUser = "User438";
   const warningTime = 30;
+
+  useEffect(() => {
+    const fetchQuestion = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/question/1'); // Example: Fetch question with ID 1
+        if (!response.ok) {
+          throw new Error('Failed to fetch question');
+        }
+        const data = await response.json();
+        setQuestion(data);
+        setTestCases(data.testCases);
+      } catch (error) {
+        console.log('Error fetching question:', error.message);
+      }
+    };
+    fetchQuestion();
+  }, []);
 
   // Timer effect
   useEffect(() => {
@@ -101,34 +126,64 @@ const Gameplay = () => {
     }
   };
 
-  const handleSubmit = () => {
-    setIsModalOpen(true);
+  const handleSubmit = async () => {
+    setIsModalOpen(true); // Open modal to indicate submission
+    try {
+      const response = await fetch('http://localhost:3001/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, testCases }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to submit code');
+      }
+      const data = await response.json();
+      setUserAResults(data.results); // Save user results, don't display them yet
+      setOutput('Code submitted successfully. Waiting for the timer to expire...');
+    } catch (error) {
+      console.log('Error submitting code:', error.message);
+      setOutput(`Error submitting code: ${error.message}`);
+    }
   };
-
+  
+  
   const confirmSubmission = () => {
     setIsModalOpen(false);
     setIsEditorDisabled(true); // Lock the editor
     setOutput('Submission received. Waiting for timer to expire...');
   };
 
+
+
   const fetchResults = async () => {
     try {
-      console.log(`Fetching results for match ID: ${matchId}`);
-      const response = await fetch(`http://localhost:3001/results/${matchId}`);
-      console.log("Response Object:", response);
+      const response = await fetch('http://localhost:3001/compare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userAResults: userAResults || [], // Ensure results are available
+          userBResults: userBResults || [], // Replace with actual or mock data
+        }),
+      });
+  
       if (!response.ok) {
-        const errorData = await response.json();
-        console.log('Error from server:', errorData);
-        throw new Error(errorData.error || 'Failed to fetch results');
+        throw new Error('Failed to fetch results');
       }
+  
       const data = await response.json();
       console.log('Fetched Results:', data);
-      setResults(data);
+      setResults(data); // Update results after timer ends
     } catch (error) {
-      console.log('Error Fetching Results:', error.message);
+      console.error('Error Fetching Results:', error.message);
       setOutput(`Error fetching results: ${error.message}`);
     }
   };
+  
+
+  const initialCode = `def solution(x):
+# Write your code here
+  pass
+`;
 
   const problemDescription = `Problem ${matchId}`;
 
@@ -162,13 +217,16 @@ const Gameplay = () => {
       </div>
 
       <div className="gameplay-main-content">
-        <div className="problem-description">
-          <h2>{problemDescription}</h2>
-          <div className="description-content">
-            {/* Add your problem description content here */}
-          </div>
-        </div>
-
+      <div className="problem-description">
+        {question ? (
+          <>
+            <h2>{question.title}</h2>
+            <p>{question.description}</p>
+          </>
+        ) : (
+          <p>Loading question...</p>
+        )}
+      </div>
         <div className="code-editor">
           <div className="editor-header">
             <h2>Code Editor</h2>
@@ -182,7 +240,7 @@ const Gameplay = () => {
           </div>
           <div className="editor-content">
             <CodeMirror
-              value={code}
+              value={code||initialCode}
               height="100%"
               theme={vscodeDark}
               extensions={[python()]}
@@ -195,14 +253,13 @@ const Gameplay = () => {
         <div className="console-section">
           <h2>Console</h2>
           <div className="console-content">
-            {results ? (
-              <div>
-                <h3>Results:</h3>
-                <p>Match ID: {results.matchId}</p>
-                <p>Your Score: {results.userResults?.filter((res) => res.passed).length || 0}</p>
-                <p>Opponent's Score: {results.rivalResults?.filter((res) => res.passed).length || 0}</p>
-                <h4>Winner: {results.winner || 'N/A'}</h4>
-              </div>
+          {results ? (
+            <div>
+              <h3>Results:</h3>
+              <p>Your Score: {results.userAScore}</p>
+              <p>Opponent's Score: {results.userBScore}</p>
+              <h4>Winner: {results.winner}</h4>
+            </div>
             ) : (
               <pre>{output}</pre>
             )}

@@ -10,6 +10,39 @@ const app = express();
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
 
+const questions = [
+    {
+        id: 1,
+        title: "Square a Number",
+        description: "Write a program that reads an integer and prints its square.",
+        testCases: [
+            { input: "5\n", expectedOutput: "25\n", time_limit: 2 },
+            { input: "3\n", expectedOutput: "9\n", time_limit: 2 },
+            { input: "-4\n", expectedOutput: "16\n", time_limit: 2 },
+        ],
+    },
+    {
+        id: 2,
+        title: "Sum of Two Numbers",
+        description: "Write a program that reads two integers and prints their sum.",
+        testCases: [
+            { input: "2 3\n", expectedOutput: "5\n", time_limit: 2 },
+            { input: "-1 -1\n", expectedOutput: "-2\n", time_limit: 2 },
+            { input: "0 0\n", expectedOutput: "0\n", time_limit: 2 },
+        ],
+    },
+];
+
+app.get('/question/:id', (req, res) => {
+    const { id } = req.params;
+    const question = questions.find((q) => q.id === parseInt(id));
+    if (!question) {
+        return res.status(404).send({ error: "Question not found" });
+    }
+    res.send(question);
+});
+
+
 app.get('/results/:matchId', (req, res) => {
     const { matchId } = req.params;
     console.log(`Received matchId: ${matchId}`);
@@ -25,7 +58,7 @@ app.get('/results/:matchId', (req, res) => {
     });
   });
 
-app.post('/submit', (req, res) => {
+  app.post('/submit', (req, res) => {
     const { code, testCases } = req.body;
 
     // Ensure 'temp' directory exists
@@ -97,27 +130,17 @@ app.post('/compare', (req, res) => {
     const userAScore = userAResults.filter((result) => result.passed).length;
     const userBScore = userBResults.filter((result) => result.passed).length;
 
-    const userATime = userAResults.reduce(
-        (total, result) => total + parseInt(result.executionTime),
-        0
-    );
-    const userBTime = userBResults.reduce(
-        (total, result) => total + parseInt(result.executionTime),
-        0
-    );
-
     let winner;
     if (userAScore > userBScore) {
         winner = 'User A';
     } else if (userBScore > userAScore) {
         winner = 'User B';
     } else {
-        winner = userATime < userBTime ? 'User A' : 'User B';
+        winner = 'It’s a tie!';
     }
 
     res.send({
         scores: { userAScore, userBScore },
-        executionTimes: { userATime: `${userATime} ms`, userBTime: `${userBTime} ms` },
         winner,
     });
 });
