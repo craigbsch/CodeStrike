@@ -29,6 +29,10 @@ const Gameplay = () => {
   const warningTime = 30;
 
   useEffect(() => {
+    console.log("Code state updated:", code);
+  }, [code]);
+  
+  useEffect(() => {
     const fetchQuestion = async () => {
       try {
         const response = await fetch('http://localhost:3001/question/1'); // Example: Fetch question with ID 1
@@ -77,81 +81,69 @@ const Gameplay = () => {
     setOutput('Executing code...');
 
     try {
-      const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'accept': 'application/json',
-          'X-RapidAPI-Key': process.env.REACT_APP_RAPID_API_KEY,
-          'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
-        },
-        body: JSON.stringify({
-          source_code: code,
-          language_id: 71,
-          stdin: '',
-          expected_output: null,
-        })
-      });
+        console.log("Sending code to backend for execution:", code);
 
-      if (!submitResponse.ok) {
-        const errorText = await submitResponse.text();
-        throw new Error(`API Error (${submitResponse.status}): ${errorText}`);
-      }
+        const response = await fetch('http://localhost:3001/run-test-cases', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, testCases: testCases.slice(0, 2) }), // Send the first two test cases
+        });
 
-      const token = await submitResponse.json();
-
-      const resultResponse = await fetch(`https://judge0-ce.p.rapidapi.com/submissions/${token.token}`, {
-        method: 'GET',
-        headers: {
-          'X-RapidAPI-Key': process.env.REACT_APP_RAPID_API_KEY,
-          'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+        if (!response.ok) {
+            throw new Error(`Failed to execute code: ${response.statusText}`);
         }
-      });
 
-      if (!resultResponse.ok) {
-        throw new Error('Failed to get results');
-      }
+        const { results } = await response.json();
+        console.log("API Response:", results);
 
-      const result = await resultResponse.json();
-      let outputText = '';
-      if (result.compile_output) outputText += `Compilation Output:\n${result.compile_output}\n`;
-      if (result.stderr) outputText += `Error:\n${result.stderr}\n`;
-      if (result.stdout) outputText += `Output:\n${result.stdout}\n`;
-      if (!outputText) outputText = 'No output generated.';
-      setOutput(outputText);
+        let outputText = 'Execution Results:\n\n';
+        results.forEach((test, index) => {
+            outputText += `Test Case ${index + 1}:\n`;
+            outputText += `Input: ${test.testCase}\nExpected: ${test.expectedOutput}\nOutput: ${test.userOutput}\nPassed: ${test.passed}\n\n`;
+        });
+        
+        setOutput(outputText); // Update the output in the UI
     } catch (error) {
-      setOutput(`Error: ${error.message}\nPlease try again.`);
+        console.error("Error in handleRun:", error.message);
+        setOutput(`Error: ${error.message}`);
     } finally {
-      setIsCodeRunning(false);
+        setIsCodeRunning(false);
     }
-  };
+};
 
-  const handleSubmit = async () => {
-    setIsModalOpen(true); // Open modal to indicate submission
+  
+  
+  const handleSubmit = () => {
+    setIsModalOpen(true); // Open the confirmation modal
+};
+
+const processSubmission = async () => {
     try {
-      const response = await fetch('http://localhost:3001/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, testCases }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to submit code');
-      }
-      const data = await response.json();
-      setUserAResults(data.results); // Save user results, don't display them yet
-      setOutput('Code submitted successfully. Waiting for the timer to expire...');
+        const startTime = performance.now();
+
+        const response = await fetch('http://localhost:3001/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, testCases }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to submit code');
+        }
+
+        const { results, totalPassed } = await response.json();
+        const endTime = performance.now();
+
+        setUserAResults(results);
+        setOutput(`Code submitted successfully.\nTotal Passed: ${totalPassed}/${testCases.length}\nExecution Time: ${(endTime - startTime).toFixed(2)}ms`);
     } catch (error) {
-      console.log('Error submitting code:', error.message);
-      setOutput(`Error submitting code: ${error.message}`);
+        setOutput(`Error submitting code: ${error.message}`);
+    } finally {
+        setIsEditorDisabled(true); // Lock the editor after submission
+        setIsModalOpen(false); // Close the modal
     }
-  };
-  
-  
-  const confirmSubmission = () => {
-    setIsModalOpen(false);
-    setIsEditorDisabled(true); // Lock the editor
-    setOutput('Submission received. Waiting for timer to expire...');
-  };
+};
+
 
 
 
@@ -268,9 +260,11 @@ const Gameplay = () => {
       </div>
 
       <ConfirmationModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onConfirm={confirmSubmission} 
+        isOpen={isModalOpen}
+        onConfirm={() => {
+            processSubmission(); 
+        }}
+        onClose={() => setIsModalOpen(false)}
       />
     </div>
   );
