@@ -118,33 +118,31 @@ const Gameplay = () => {
 };
 
 const processSubmission = async () => {
-    try {
-        const startTime = performance.now();
+  try {
+      const response = await fetch('http://localhost:3001/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, testCases }),
+      });
 
-        const response = await fetch('http://localhost:3001/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, testCases }),
-        });
+      if (!response.ok) {
+          throw new Error('Failed to submit code');
+      }
 
-        if (!response.ok) {
-            throw new Error('Failed to submit code');
-        }
+      const data = await response.json();
+      console.log("Submission Results:", data);
 
-        const { results, totalPassed } = await response.json();
-        const endTime = performance.now();
-
-        setUserAResults(results);
-        setOutput(`Code submitted successfully.\nTotal Passed: ${totalPassed}/${testCases.length}\nExecution Time: ${(endTime - startTime).toFixed(2)}ms`);
-    } catch (error) {
-        setOutput(`Error submitting code: ${error.message}`);
-    } finally {
-        setIsEditorDisabled(true); // Lock the editor after submission
-        setIsModalOpen(false); // Close the modal
-    }
+      // Update state with results
+      setUserAResults(data.results);
+      setOutput(`Code submitted successfully.\nTotal Passed: ${data.passedCount}/${testCases.length}\nExecution Time: ${data.totalTime}`);
+  } catch (error) {
+      console.error("Error submitting code:", error);
+      setOutput(`Error submitting code: ${error.message}`);
+  } finally {
+      setIsEditorDisabled(true); // Lock the editor after submission
+      setIsModalOpen(false); // Close the modal
+  }
 };
-
-
 
 
   const fetchResults = async () => {
