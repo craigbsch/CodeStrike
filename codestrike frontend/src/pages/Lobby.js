@@ -21,19 +21,16 @@ const Lobby = () => {
 
   const joinMatch = () => {
     if (matchId && username) {
-      const socketInstance = io('http://localhost:3000'); // Initialize Socket.IO
+      const socketInstance = io('http://localhost:3000'); 
       setSocket(socketInstance);
 
       socketInstance.emit('joinRoom', { roomId: matchId, username });
 
-      // Listen for 'startMatch' to navigate
       socketInstance.on('startMatch', (data) => {
         setOpponentUsername(data.opponentUsername);
-        // Pass the opponent's username when navigating to Gameplay
         navigate(`/gameplay/${matchId}`, { state: { username, opponentUsername: data.opponentUsername } });
       });
 
-      // Optionally handle waiting state
       socketInstance.on('waitingForOpponent', (data) => {
         console.log(data.message);
         alert('Waiting for another player to join...');

@@ -10,18 +10,16 @@ app.use(express.json());
 
 const cors = require('cors');
 app.use(cors({
-    origin: 'http://localhost:3000', // Frontend domain
+    origin: 'http://localhost:3000', 
     methods: ['GET', 'POST'],
     credentials: true
 }));
 const tempDir = path.resolve(__dirname, 'temp');
 
-// Ensure the temp directory exists
 if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir);
 }
 
-// Set up HTTP server and Socket.IO
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
@@ -39,42 +37,35 @@ io.on('connection', (socket) => {
         console.log(`is room initialized: ${!matches[roomId]}`);
         console.log(`dictionary: ${matches}`);
 
-        // Ensure the room array is initialized
         if (matches[roomId]) {
             if (matches[roomId].length == 1){
             
             }else{
-                matches[roomId] = []; // Initialize room as an array
+                matches[roomId] = []; 
                 console.log(`New room initialized: ${roomId}`);
             }
         }
 
-        // Push the player into the room
         matches[roomId].push({ id: socket.id, username });
         console.log(`Player ${username} with ID ${socket.id} joined room ${roomId}`);
         console.log(`Current players in room ${roomId}:`, matches[roomId]);
 
-        // Join the Socket.IO room
         socket.join(roomId);
 
-        // Check if the room now has 2 players
         if (matches[roomId].length === 2) {
             const [player1, player2] = matches[roomId];
             console.log(`Room ${roomId} is now full. Starting match.`);
             
-            // Notify both players that the match is starting
             io.to(player1.id).emit('startMatch', { opponentUsername: player2.username });
             io.to(player2.id).emit('startMatch', { opponentUsername: player1.username });
             console.log("REACHED END")
         } else {
-            // Notify the current player that they are waiting for an opponent
             socket.emit('waitingForOpponent', { message: 'Waiting for another player to join...' });
         }
     });
 
     socket.on('disconnect', () => {
         console.log(`User disconnected: ${socket.id}`);
-        // Handle removing the player from matches[roomId] if necessary
     });
 });
 
@@ -85,23 +76,18 @@ app.get('/matches', (req, res) => {
     res.json(matches);
 });
 
-// Create a new match
 app.post('/create-match', (req, res) => {
     const matchId = Math.random().toString(36).substring(2, 8);
-    // Initialize the match in memory
     matches[matchId] = { players: [] };
     res.send({ matchId });
 });
 
-// Join an existing match
 app.post('/join-match', (req, res) => {
     const { matchId } = req.body;
     if (!matches[matchId]) {
         return res.status(400).send({ success: false, error: 'Match does not exist.' });
     }
 
-    // We do not finalize joining here. The actual join happens in Socket.IO `joinRoom` event.
-    // But we return success to proceed in the client, so the user can navigate to /gameplay/:matchId
     res.send({ success: true });
 });
 
@@ -115,10 +101,8 @@ app.post('/run-test-cases', async (req, res) => {
     const codeFilePath = path.join(tempDir, 'solution.py');
     const testWrapperPath = path.join(tempDir, 'wrapped_solution.py');
 
-    // Write the user's solution to solution.py
     fs.writeFileSync(codeFilePath, code);
 
-    // Create a wrapped solution script
     const wrappedSolution = `
 ${code.replace(/if __name__ == ['"]__main__['"]:/g, '# if __name__ == "__main__":').replace(/^\s+print\(.*\)$/gm, '')}
 
@@ -161,7 +145,6 @@ if __name__ == "__main__":
 
     console.log("Wrapped solution content:", fs.readFileSync(testWrapperPath, 'utf8'));
 
-    // Docker command to execute the wrapped script
     const dockerCommand = `docker run --rm -v "${tempDir}:/sandbox/temp" docker_python sh -c "python3 /sandbox/temp/wrapped_solution.py"`;
 
     exec(dockerCommand, (err, stdout, stderr) => {
@@ -175,7 +158,7 @@ if __name__ == "__main__":
         }
 
         try {
-            const results = JSON.parse(stdout.trim()); // Parse the JSON results
+            const results = JSON.parse(stdout.trim()); 
             res.send({ results });
         } catch (parseError) {
             console.error("Error parsing JSON output:", parseError.message);
@@ -217,33 +200,18 @@ app.get('/question/:id', (req, res) => {
     res.send(question);
 });
 
-app.get('/results/:matchId', (req, res) => {
-    const { matchId } = req.params;
-    console.log(`Received matchId: ${matchId}`);
-    res.json({
-        matchId,
-        userResults: [
-            { passed: true }, { passed: false }
-        ],
-        rivalResults: [
-            { passed: true }, { passed: true }
-        ],
-        winner: 'Rival User'
-    });
-});
 
-const submissions = []; // Array to store submissions
+
+const submissions = []; 
 
 app.post('/submit', async (req, res) => {
     const { username, code, testCases, roomId } = req.body;
 
-    // Ensure the temp directory exists
     const tempDir = path.resolve(__dirname, 'temp').replace(/\\/g, '/');
     if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir);
     }
 
-    // Save the user code to a file
     const codeFilePath = path.join(tempDir, `wrapped_solution.py`);
     const wrappedCode = `
 ${code.replace(/if __name__ == ['"]__main__['"]:/g, '# if __name__ == "__main__":')}
@@ -282,7 +250,6 @@ if __name__ == "__main__":
 `;
     fs.writeFileSync(codeFilePath, wrappedCode);
 
-    // Start tracking total execution time
     const startTime = new Date();
 
     try {
@@ -308,7 +275,6 @@ if __name__ == "__main__":
                 const results = JSON.parse(stdout.trim());
                 const passedCount = results.filter((result) => result.passed).length;
 
-                // Add the submission to the global submissions array
                 submissions.push({
                     username,
                     roomId,
@@ -345,7 +311,6 @@ if __name__ == "__main__":
 app.post('/compare', (req, res) => {
     const { roomId } = req.body;
   
-    // Filter submissions by roomId
     const roomSubmissions = submissions.filter((sub) => sub.roomId === roomId);
   
     if (roomSubmissions.length < 2) {
@@ -354,7 +319,6 @@ app.post('/compare', (req, res) => {
   
     console.log("Submissions for room:", roomSubmissions);
   
-    // Determine winner
     const [submission1, submission2] = roomSubmissions;
   
     const score1 = submission1.results.filter((r) => r.passed).length;
