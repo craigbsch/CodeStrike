@@ -30,15 +30,7 @@ const io = new Server(server, {
 });
 
 
-// In-memory matches storage:
-// matches = { matchId: { players: [socketId1, socketId2] } }
-const matchRooms = {};
-// In-memory storage for users
-const users = {}; // { socketId: { username, roomId } }
 
-const rooms = {}; // Store room info
-
-// Ensure 'matches' is initialized as an object
 const matches = {};
 
 io.on('connection', (socket) => {
@@ -88,6 +80,10 @@ io.on('connection', (socket) => {
 
 
 // HTTP Endpoints
+
+app.get('/matches', (req, res) => {
+    res.json(matches);
+});
 
 // Create a new match
 app.post('/create-match', (req, res) => {

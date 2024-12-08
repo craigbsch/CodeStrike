@@ -9,6 +9,8 @@ const Lobby = () => {
   const [matchId, setMatchId] = useState('');
   const [username, setUsername] = useState('');
   const [isCreatingMatch, setIsCreatingMatch] = useState(false);
+  const [opponentUsername, setOpponentUsername] = useState('');
+  const [socket, setSocket] = useState(null);
 
   const createMatch = async () => {
     const response = await fetch('http://localhost:3001/create-match', { method: 'POST' });
@@ -17,27 +19,27 @@ const Lobby = () => {
     setIsCreatingMatch(true);
   };
 
-  const joinMatch = async () => {
-    if (matchId.trim() && username.trim()) {
-        const socket = io('http://localhost:3000'); // Connect to the backend
-        console.log("CALLED FROM LOBBY HERE");
-        socket.emit('joinRoom', { roomId: matchId, username });
+  const joinMatch = () => {
+    if (matchId && username) {
+      const socketInstance = io('http://localhost:3000'); // Initialize Socket.IO
+      setSocket(socketInstance);
 
-        // Listen for 'startMatch' event to navigate
-        socket.on('startMatch', (data) => {
-            console.log(`Match started with opponent: ${data.opponentUsername}`);
-            navigate(`/gameplay/${matchId}`, { state: { username, opponentUsername: data.opponentUsername } });
-        });
+      socketInstance.emit('joinRoom', { roomId: matchId, username });
 
-        // Optionally, display a waiting message while waiting for the opponent
-        socket.on('waitingForOpponent', (data) => {
-            console.log(data.message);
-            alert(data.message);
-        });
-    } else {
-        alert('Please enter both a match ID and a username.');
+      // Listen for 'startMatch' to navigate
+      socketInstance.on('startMatch', (data) => {
+        setOpponentUsername(data.opponentUsername);
+        // Pass the opponent's username when navigating to Gameplay
+        navigate(`/gameplay/${matchId}`, { state: { username, opponentUsername: data.opponentUsername } });
+      });
+
+      // Optionally handle waiting state
+      socketInstance.on('waitingForOpponent', (data) => {
+        console.log(data.message);
+        alert('Waiting for another player to join...');
+      });
     }
-};
+  };
 
 
   return (

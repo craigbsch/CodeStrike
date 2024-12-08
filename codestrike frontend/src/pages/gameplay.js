@@ -22,7 +22,8 @@ const Gameplay = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [rivalUsername, setRivalUsername] = useState('Waiting for opponent...');
+  const { username, opponentUsername } = location.state || {};
+  const [rivalUsername, setRivalUsername] = useState(opponentUsername || 'Waiting for opponent...');
   const [time, setTime] = useLocalStorage(`matchTime-${matchId}`, matchTime);
   const [isCodeRunning, setIsCodeRunning] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,6 +43,11 @@ const Gameplay = () => {
   const [userData, setUserData] = useState({ name: '', email: '' });
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 
+  useEffect(() => {
+    console.log('Username:', username);
+    console.log('Opponent Username:', rivalUsername);
+  }, [username, rivalUsername]);
+  
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -81,15 +87,10 @@ const Gameplay = () => {
     });
 
     socketRef.current.on('startMatch', (data) => {
-        console.log('Match started with opponent:', data.opponentId);
-
-        const rivalDocRef = doc(db, "Users", data.opponentId);
-        getDoc(rivalDocRef).then((docSnap) => {
-            if (docSnap.exists()) {
-                setRivalUsername(docSnap.data().userName || 'Unknown Opponent');
-            }
-        });
-    });
+      console.log('Match started with opponent (from gameplay file):', data.opponentUsername);
+      setRivalUsername(data.opponentUsername || 'Unknown Opponent');
+      console.log(`opponent is: ${rivalUsername}`)
+  });
 
     return () => {
         socketRef.current.disconnect();
