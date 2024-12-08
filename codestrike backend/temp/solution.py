@@ -1,4 +1,4 @@
 def solution(x):
 # Write your code here
-  return x
+  return x**2
   pass
