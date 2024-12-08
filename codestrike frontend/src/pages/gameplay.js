@@ -14,7 +14,7 @@ import { doc, getDoc } from 'firebase/firestore';
 // Socket.IO
 import { io } from 'socket.io-client';
 
-const SOCKET_SERVER_URL = "http://localhost:3000"; // Update this if needed
+const SOCKET_SERVER_URL = "http://localhost:3000"; 
 const matchTime = 50;
 const warningTime = 30;
 
@@ -36,12 +36,9 @@ const Gameplay = () => {
   const [output, setOutput] = useState('');
   const [isEditorDisabled, setIsEditorDisabled] = useState(false);
   const [results, setResults] = useState(null);
-  //const { username, opponentUsername, userRole } = location.state || {};
 
-  // Socket reference
   const socketRef = useRef(null);
 
-  // User data from Firebase
   const [userData, setUserData] = useState({ name: '', email: '' });
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 
@@ -49,6 +46,7 @@ const Gameplay = () => {
     console.log('Username:', username);
     console.log('Opponent Username:', rivalUsername);
   }, [username, rivalUsername]);
+
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -73,13 +71,13 @@ const Gameplay = () => {
     fetchUserData();
   }, []);
 
-  // Socket.IO setup
+
+
   useEffect(() => {
     socketRef.current = io(SOCKET_SERVER_URL);
 
     socketRef.current.on('connect', () => {
         console.log('Connected to socket server:', socketRef.current.id);
-        //socketRef.current.emit('joinRoom', matchId);
     });
 
     socketRef.current.on('waitingForOpponent', (data) => {
@@ -103,11 +101,11 @@ const Gameplay = () => {
     };
 }, [matchId]);
 
-  // Fetch question on mount
+
   useEffect(() => {
     const fetchQuestion = async () => {
       try {
-        const response = await fetch('http://localhost:3001/question/1'); // Example ID: 1
+        const response = await fetch('http://localhost:3001/question/1'); 
         if (!response.ok) {
           throw new Error('Failed to fetch question');
         }
@@ -121,7 +119,6 @@ const Gameplay = () => {
     fetchQuestion();
   }, []);
 
-  // Timer logic
   useEffect(() => {
     let timer;
     if (time > 0 && !results) {
@@ -158,7 +155,6 @@ const Gameplay = () => {
       const response = await fetch('http://localhost:3001/run-test-cases', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        //body: JSON.stringify({ code, testCases }), // Ensure these variables are set correctly
         body: JSON.stringify({ code, testCases: testCases.slice(0, 2) }),
       });
 
@@ -186,27 +182,27 @@ const Gameplay = () => {
 };
 
   const handleSubmit = () => {
-    setIsModalOpen(true); // Open confirmation modal
+    setIsModalOpen(true); 
   };
 
   const processSubmission = async () => {
     try {
         setOutput('Submitting code...');
-        const startTime = Date.now(); // Record the start time
+        const startTime = Date.now(); 
 
         const response = await fetch('http://localhost:3001/submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                username, // Ensure the username is passed
+                username, 
                 code,
                 testCases,
-                roomId: matchId, // Ensure roomId is sent
+                roomId: matchId, 
             }),
         });
 
-        const endTime = Date.now(); // Record the end time
-        const executionTime = `${endTime - startTime} ms`; // Calculate execution time
+        const endTime = Date.now(); 
+        const executionTime = `${endTime - startTime} ms`; 
 
         if (!response.ok) {
             throw new Error(`Failed to submit code: ${response.statusText}`);
@@ -215,12 +211,10 @@ const Gameplay = () => {
         const data = await response.json();
         console.log('Submission successful:', data);
 
-        // Update the output with submission results
         setOutput(
             `Submission successful. Passed: ${data.passedCount}, Execution Time: ${data.totalTime}`
         );
 
-        // Store execution time and results for comparison
         setUserAResults(data.results);
         localStorage.setItem('executionTime', executionTime);
     } catch (error) {
@@ -244,7 +238,7 @@ const fetchResults = async () => {
               userAResults: userRole === 'User A' ? userAResults : undefined,
               userBResults: userRole === 'User B' ? userBResults : undefined,
               userATime: userRole === 'User A' ? userATime : undefined,
-              userBTime: userRole === 'User B' ? userATime : undefined, // Use opponent's time here
+              userBTime: userRole === 'User B' ? userATime : undefined, 
               roomId: matchId,
           }),
       });
