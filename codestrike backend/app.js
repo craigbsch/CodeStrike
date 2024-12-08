@@ -30,15 +30,7 @@ const io = new Server(server, {
 });
 
 
-// In-memory matches storage:
-// matches = { matchId: { players: [socketId1, socketId2] } }
-const matchRooms = {};
-// In-memory storage for users
-const users = {}; // { socketId: { username, roomId } }
 
-const rooms = {}; // Store room info
-
-// Ensure 'matches' is initialized as an object
 const matches = {};
 
 io.on('connection', (socket) => {
@@ -88,6 +80,10 @@ io.on('connection', (socket) => {
 
 
 // HTTP Endpoints
+
+app.get('/matches', (req, res) => {
+    res.json(matches);
+});
 
 // Create a new match
 app.post('/create-match', (req, res) => {
@@ -236,8 +232,10 @@ app.get('/results/:matchId', (req, res) => {
     });
 });
 
+const submissions = []; // Array to store submissions
+
 app.post('/submit', async (req, res) => {
-    const { code, testCases } = req.body;
+    const { username, code, testCases, roomId } = req.body;
 
     // Ensure the temp directory exists
     const tempDir = path.resolve(__dirname, 'temp').replace(/\\/g, '/');
@@ -310,10 +308,21 @@ if __name__ == "__main__":
                 const results = JSON.parse(stdout.trim());
                 const passedCount = results.filter((result) => result.passed).length;
 
-                res.send({
+                // Add the submission to the global submissions array
+                submissions.push({
+                    username,
+                    roomId,
                     results,
+                    executionTime: totalExecutionTime,
+                    passedCount,
+                });
+
+                console.log("Updated submissions:", submissions);
+
+                res.send({
+                    message: `Submission received for ${username}`,
                     totalTime: totalExecutionTime,
-                    passedCount
+                    passedCount,
                 });
             } catch (parseError) {
                 console.error("Error parsing JSON output:", parseError.message);
@@ -332,39 +341,47 @@ if __name__ == "__main__":
 
 
 
+
 app.post('/compare', (req, res) => {
-    const { userAResults, userBResults, userATime, userBTime } = req.body;
-
-    if (!userAResults || !userBResults || userATime == null || userBTime == null) {
-        return res.status(400).send({ error: "Missing required fields in request body" });
+    const { roomId } = req.body;
+  
+    // Filter submissions by roomId
+    const roomSubmissions = submissions.filter((sub) => sub.roomId === roomId);
+  
+    if (roomSubmissions.length < 2) {
+      return res.status(400).send({ message: "Not enough submissions to compare" });
     }
-
-    const userAScore = userAResults.filter((result) => result.passed).length;
-    const userBScore = userBResults.filter((result) => result.passed).length;
-
+  
+    console.log("Submissions for room:", roomSubmissions);
+  
+    // Determine winner
+    const [submission1, submission2] = roomSubmissions;
+  
+    const score1 = submission1.results.filter((r) => r.passed).length;
+    const score2 = submission2.results.filter((r) => r.passed).length;
+  
     let winner;
-    if (userAScore > userBScore) {
-        winner = 'User A';
-    } else if (userBScore > userAScore) {
-        winner = 'User B';
+    if (score1 > score2) {
+      winner = submission1.username;
+    } else if (score2 > score1) {
+      winner = submission2.username;
     } else {
-        // Compare execution times when scores are tied
-        if (userATime < userBTime) {
-            winner = 'User A';
-        } else if (userBTime < userATime) {
-            winner = 'User B';
-        } else {
-            winner = 'It’s a tie!';
-        }
+      winner = submission1.executionTime < submission2.executionTime
+        ? submission1.username
+        : submission2.username;
     }
+  
+    const resultsMessage = `
+      Submissions for Room ${roomId}:
+      ${submission1.username}'s Score: ${score1}, Time: ${submission1.executionTime}
+      ${submission2.username}'s Score: ${score2}, Time: ${submission2.executionTime}
+      Winner: ${winner}
+    `;
+  
+    res.send({ resultsMessage, winner });
+  });
+  
 
-    res.send({
-        scores: { userAScore, userBScore },
-        userATime,
-        userBTime,
-        winner,
-    });
-});
 
 
 

@@ -1,5 +1,8 @@
 
-def solution(x): return x * x
+def solution(x):
+# Write your code here
+  return x**2
+  pass
 
 # Wrapper for test cases
 def run_tests():
@@ -28,6 +31,26 @@ def run_tests():
     try:
         input_value = "3"
         expected_output = "9"
+        user_output = str(solution(int(input_value.strip())))
+        passed = user_output == expected_output
+        results.append({
+            "testCase": input_value,
+            "expectedOutput": expected_output,
+            "userOutput": user_output,
+            "passed": passed
+        })
+    except Exception as e:
+        results.append({
+            "testCase": input_value,
+            "expectedOutput": expected_output,
+            "userOutput": str(e),
+            "passed": False
+        })
+        
+
+    try:
+        input_value = "-4"
+        expected_output = "16"
         user_output = str(solution(int(input_value.strip())))
         passed = user_output == expected_output
         results.append({
