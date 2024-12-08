@@ -2,14 +2,18 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
-const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
-
-app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
 
-
+const cors = require('cors');
+app.use(cors({
+    origin: 'http://localhost:3000', // Frontend domain
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
 const tempDir = path.resolve(__dirname, 'temp');
 
 // Ensure the temp directory exists
@@ -17,10 +21,97 @@ if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir);
 }
 
+// Set up HTTP server and Socket.IO
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+    }
+});
+
+
+// In-memory matches storage:
+// matches = { matchId: { players: [socketId1, socketId2] } }
+const matchRooms = {};
+// In-memory storage for users
+const users = {}; // { socketId: { username, roomId } }
+
+const rooms = {}; // Store room info
+
+// Ensure 'matches' is initialized as an object
+const matches = {};
+
+io.on('connection', (socket) => {
+    socket.on('joinRoom', ({ roomId, username }) => {
+        console.log(`Request to join room: ${roomId} by user: ${username}`);
+        console.log(`is room initialized: ${!matches[roomId]}`);
+        console.log(`dictionary: ${matches}`);
+
+        // Ensure the room array is initialized
+        if (matches[roomId]) {
+            if (matches[roomId].length == 1){
+            
+            }else{
+                matches[roomId] = []; // Initialize room as an array
+                console.log(`New room initialized: ${roomId}`);
+            }
+        }
+
+        // Push the player into the room
+        matches[roomId].push({ id: socket.id, username });
+        console.log(`Player ${username} with ID ${socket.id} joined room ${roomId}`);
+        console.log(`Current players in room ${roomId}:`, matches[roomId]);
+
+        // Join the Socket.IO room
+        socket.join(roomId);
+
+        // Check if the room now has 2 players
+        if (matches[roomId].length === 2) {
+            const [player1, player2] = matches[roomId];
+            console.log(`Room ${roomId} is now full. Starting match.`);
+            
+            // Notify both players that the match is starting
+            io.to(player1.id).emit('startMatch', { opponentUsername: player2.username });
+            io.to(player2.id).emit('startMatch', { opponentUsername: player1.username });
+            console.log("REACHED END")
+        } else {
+            // Notify the current player that they are waiting for an opponent
+            socket.emit('waitingForOpponent', { message: 'Waiting for another player to join...' });
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`User disconnected: ${socket.id}`);
+        // Handle removing the player from matches[roomId] if necessary
+    });
+});
+
+
+// HTTP Endpoints
+
+// Create a new match
+app.post('/create-match', (req, res) => {
+    const matchId = Math.random().toString(36).substring(2, 8);
+    // Initialize the match in memory
+    matches[matchId] = { players: [] };
+    res.send({ matchId });
+});
+
+// Join an existing match
+app.post('/join-match', (req, res) => {
+    const { matchId } = req.body;
+    if (!matches[matchId]) {
+        return res.status(400).send({ success: false, error: 'Match does not exist.' });
+    }
+
+    // We do not finalize joining here. The actual join happens in Socket.IO `joinRoom` event.
+    // But we return success to proceed in the client, so the user can navigate to /gameplay/:matchId
+    res.send({ success: true });
+});
+
 app.post('/run-test-cases', async (req, res) => {
     const { code, testCases } = req.body;
 
-    const tempDir = path.resolve(__dirname, 'temp');
     if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir);
     }
@@ -31,7 +122,7 @@ app.post('/run-test-cases', async (req, res) => {
     // Write the user's solution to solution.py
     fs.writeFileSync(codeFilePath, code);
 
-    // Create a new wrapped solution script
+    // Create a wrapped solution script
     const wrappedSolution = `
 ${code.replace(/if __name__ == ['"]__main__['"]:/g, '# if __name__ == "__main__":').replace(/^\s+print\(.*\)$/gm, '')}
 
@@ -40,7 +131,7 @@ def run_tests():
     results = []
     ${testCases
         .map(
-            (test, index) => `
+            (test) => `
     try:
         input_value = ${JSON.stringify(test.input.trim())}
         expected_output = ${JSON.stringify(test.expectedOutput.trim())}
@@ -69,8 +160,7 @@ if __name__ == "__main__":
     results = run_tests()
     print(json.dumps(results, indent=4))
 `;
-    
-    // Write the wrapped solution to a new file
+
     fs.writeFileSync(testWrapperPath, wrappedSolution);
 
     console.log("Wrapped solution content:", fs.readFileSync(testWrapperPath, 'utf8'));
@@ -93,14 +183,11 @@ if __name__ == "__main__":
             res.send({ results });
         } catch (parseError) {
             console.error("Error parsing JSON output:", parseError.message);
-            console.log("Unparsable stdout:", stdout.trim()); // Log the problematic output
+            console.log("Unparsable stdout:", stdout.trim());
             res.status(500).send({ error: "Failed to parse execution results." });
         }
     });
 });
-
-
-
 
 const questions = [
     {
@@ -244,8 +331,13 @@ if __name__ == "__main__":
 });
 
 
+
 app.post('/compare', (req, res) => {
-    const { userAResults, userBResults } = req.body;
+    const { userAResults, userBResults, userATime, userBTime } = req.body;
+
+    if (!userAResults || !userBResults || userATime == null || userBTime == null) {
+        return res.status(400).send({ error: "Missing required fields in request body" });
+    }
 
     const userAScore = userAResults.filter((result) => result.passed).length;
     const userBScore = userBResults.filter((result) => result.passed).length;
@@ -256,13 +348,26 @@ app.post('/compare', (req, res) => {
     } else if (userBScore > userAScore) {
         winner = 'User B';
     } else {
-        winner = 'It’s a tie!';
+        // Compare execution times when scores are tied
+        if (userATime < userBTime) {
+            winner = 'User A';
+        } else if (userBTime < userATime) {
+            winner = 'User B';
+        } else {
+            winner = 'It’s a tie!';
+        }
     }
 
     res.send({
         scores: { userAScore, userBScore },
+        userATime,
+        userBTime,
         winner,
     });
 });
 
-app.listen(3001, () => console.log('Server running on port 3001'));
+
+
+
+const PORT = 3001;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

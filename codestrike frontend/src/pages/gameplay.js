@@ -1,15 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import ConfirmationModal from './SubmitModal';
-import useLocalStorage  from './hooks/useLocalStorage';
+import useLocalStorage from './hooks/useLocalStorage';
 import './gameplay.css';
+
+// Firebase imports
+import { auth, db } from '../firebase/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+
+// Socket.IO
+import { io } from 'socket.io-client';
+
+const SOCKET_SERVER_URL = "http://localhost:3000"; // Update this if needed
+const matchTime = 50;
+const warningTime = 30;
 
 const Gameplay = () => {
   const { matchId } = useParams();
-  const matchTime = 20;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [rivalUsername, setRivalUsername] = useState('Waiting for opponent...');
   const [time, setTime] = useLocalStorage(`matchTime-${matchId}`, matchTime);
   const [isCodeRunning, setIsCodeRunning] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,25 +30,77 @@ const Gameplay = () => {
   const [testCases, setTestCases] = useState([]);
   const [userAResults, setUserAResults] = useState(null);
   const [userBResults, setUserBResults] = useState(null);
-
-  const [code, setCode] = useState(`def solution(x):
-# Write your code here
-  pass
-    `);
+  const [code, setCode] = useState(`def solution(x):\n# Write your code here\n  pass`);
   const [output, setOutput] = useState('');
-  const [isEditorDisabled, setIsEditorDisabled] = useState(false); // Disable editor after submission
-  const [results, setResults] = useState(null); // Store match results
-  const rivalUser = "User438";
-  const warningTime = 30;
+  const [isEditorDisabled, setIsEditorDisabled] = useState(false);
+  const [results, setResults] = useState(null);
+
+  // Socket reference
+  const socketRef = useRef(null);
+
+  // User data from Firebase
+  const [userData, setUserData] = useState({ name: '', email: '' });
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   useEffect(() => {
-    console.log("Code state updated:", code);
-  }, [code]);
-  
+    const fetchUserData = async () => {
+      try {
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          const userDocRef = doc(db, "Users", currentUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            setUserData({
+              name: userDoc.data().userName || '',
+              email: currentUser.email || ''
+            });
+          }
+        }
+        setIsLoadingUser(false);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setIsLoadingUser(false);
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  // Socket.IO setup
+  useEffect(() => {
+    socketRef.current = io(SOCKET_SERVER_URL);
+
+    socketRef.current.on('connect', () => {
+        console.log('Connected to socket server:', socketRef.current.id);
+        //socketRef.current.emit('joinRoom', matchId);
+        console.log("CALLED FROM GAMEPLAY");
+    });
+
+    socketRef.current.on('waitingForOpponent', (data) => {
+        console.log(data.message);
+        setRivalUsername('Waiting for opponent...');
+    });
+
+    socketRef.current.on('startMatch', (data) => {
+        console.log('Match started with opponent:', data.opponentId);
+
+        const rivalDocRef = doc(db, "Users", data.opponentId);
+        getDoc(rivalDocRef).then((docSnap) => {
+            if (docSnap.exists()) {
+                setRivalUsername(docSnap.data().userName || 'Unknown Opponent');
+            }
+        });
+    });
+
+    return () => {
+        socketRef.current.disconnect();
+    };
+}, [matchId]);
+
+  // Fetch question on mount
   useEffect(() => {
     const fetchQuestion = async () => {
       try {
-        const response = await fetch('http://localhost:3001/question/1'); // Example: Fetch question with ID 1
+        const response = await fetch('http://localhost:3001/question/1'); // Example ID: 1
         if (!response.ok) {
           throw new Error('Failed to fetch question');
         }
@@ -49,19 +114,19 @@ const Gameplay = () => {
     fetchQuestion();
   }, []);
 
-  // Timer effect
+  // Timer logic
   useEffect(() => {
     let timer;
-    if (time > 0) {
+    if (time > 0 && !results) {
       timer = setInterval(() => {
         setTime((prevTime) => prevTime - 1);
       }, 1000);
     } else if (time === 0 && !results) {
       console.log("Timer reached 0. Fetching results...");
-      fetchResults(); // Fetch results when timer runs out
+      fetchResults();
     }
     return () => clearInterval(timer);
-  }, [time, results]);
+  }, [time, results, setTime]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -72,8 +137,10 @@ const Gameplay = () => {
   const progressPercentage = (time / matchTime) * 100;
   const isTimeWarning = time <= warningTime;
 
-  const onChange = React.useCallback((value, viewUpdate) => {
-    if (!isEditorDisabled) setCode(value);
+  const onChange = useCallback((value) => {
+    if (!isEditorDisabled) {
+      setCode(value);
+    }
   }, [isEditorDisabled]);
 
   const handleRun = async () => {
@@ -81,117 +148,104 @@ const Gameplay = () => {
     setOutput('Executing code...');
 
     try {
-        console.log("Sending code to backend for execution:", code);
+      const response = await fetch('http://localhost:3001/run-test-cases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, testCases: testCases.slice(0, 2) }),
+      });
 
-        const response = await fetch('http://localhost:3001/run-test-cases', {
+      if (!response.ok) {
+        throw new Error(`Failed to execute code: ${response.statusText}`);
+      }
+
+      const { results } = await response.json();
+
+      let outputText = 'Execution Results:\n\n';
+      results.forEach((test, index) => {
+        outputText += `Test Case ${index + 1}:\n`;
+        outputText += `Input: ${test.testCase}\nExpected: ${test.expectedOutput}\nOutput: ${test.userOutput}\nPassed: ${test.passed}\n\n`;
+      });
+
+      setOutput(outputText);
+    } catch (error) {
+      console.error("Error in handleRun:", error.message);
+      setOutput(`Error: ${error.message}`);
+    } finally {
+      setIsCodeRunning(false);
+    }
+  };
+
+  const handleSubmit = () => {
+    setIsModalOpen(true); // Open confirmation modal
+  };
+
+  const processSubmission = async () => {
+    try {
+        const response = await fetch('http://localhost:3001/submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, testCases: testCases.slice(0, 2) }), // Send the first two test cases
+            body: JSON.stringify({ code, testCases }),
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to execute code: ${response.statusText}`);
+            throw new Error(`Failed to submit code: ${response.statusText}`);
         }
 
-        const { results } = await response.json();
-        console.log("API Response:", results);
-
-        let outputText = 'Execution Results:\n\n';
-        results.forEach((test, index) => {
-            outputText += `Test Case ${index + 1}:\n`;
-            outputText += `Input: ${test.testCase}\nExpected: ${test.expectedOutput}\nOutput: ${test.userOutput}\nPassed: ${test.passed}\n\n`;
-        });
-        
-        setOutput(outputText); // Update the output in the UI
+        const data = await response.json();
+        setUserAResults(data.results);
+        setOutput(`Code submitted successfully.\nTotal Passed: ${data.passedCount}/${testCases.length}\nExecution Time: ${data.totalTime}`);
     } catch (error) {
-        console.error("Error in handleRun:", error.message);
-        setOutput(`Error: ${error.message}`);
+        console.error("Error submitting code:", error.message);
+        setOutput(`Error submitting code: ${error.message}`);
     } finally {
-        setIsCodeRunning(false);
+        setIsEditorDisabled(true);
+        setIsModalOpen(false);
     }
 };
 
-  
-  
-  const handleSubmit = () => {
-    setIsModalOpen(true); // Open the confirmation modal
-};
 
-const processSubmission = async () => {
-  try {
-      const response = await fetch('http://localhost:3001/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, testCases }),
-      });
-
-      if (!response.ok) {
-          throw new Error('Failed to submit code');
-      }
-
-      const data = await response.json();
-      console.log("Submission Results:", data);
-
-      // Update state with results
-      setUserAResults(data.results);
-      setOutput(`Code submitted successfully.\nTotal Passed: ${data.passedCount}/${testCases.length}\nExecution Time: ${data.totalTime}`);
-  } catch (error) {
-      console.error("Error submitting code:", error);
-      setOutput(`Error submitting code: ${error.message}`);
-  } finally {
-      setIsEditorDisabled(true); // Lock the editor after submission
-      setIsModalOpen(false); // Close the modal
-  }
-};
-
-
-  const fetchResults = async () => {
+const fetchResults = async () => {
     try {
-      const response = await fetch('http://localhost:3001/compare', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userAResults: userAResults || [], // Ensure results are available
-          userBResults: userBResults || [], // Replace with actual or mock data
-        }),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to fetch results');
-      }
-  
-      const data = await response.json();
-      console.log('Fetched Results:', data);
-      setResults(data); // Update results after timer ends
+        const response = await fetch('http://localhost:3001/compare', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userAResults,
+                userBResults,
+                userATime: localStorage.getItem('userATime'), // Retrieve stored execution time
+                userBTime: localStorage.getItem('userBTime') // Retrieve rival's execution time
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch results');
+        }
+
+        const data = await response.json();
+        console.log('Fetched Results:', data);
+        setResults(data);
     } catch (error) {
-      console.error('Error Fetching Results:', error.message);
-      setOutput(`Error fetching results: ${error.message}`);
+        console.error('Error Fetching Results:', error.message);
+        setOutput(`Error fetching results: ${error.message}`);
     }
-  };
-  
+};
 
-  const initialCode = `def solution(x):
-# Write your code here
-  pass
-`;
 
-  const problemDescription = `Problem ${matchId}`;
+
+  if (isLoadingUser) {
+    return <div>Loading user data...</div>;
+  }
 
   return (
     <div className="gameplay-container">
       <div className="header">
         <div className="left-section">
-          <img 
-            src={process.env.PUBLIC_URL + '/codestrike_logo.png'} 
-            alt="Logo" 
-            className="gameplay-logo" 
-            style={{ cursor: 'pointer' }}
-          />
+          <span className="user-info">{userData.name} ({userData.email})</span>
           <button className="submit-btn" onClick={handleSubmit} disabled={isEditorDisabled}>
             {isEditorDisabled ? 'Submitted' : 'SUBMIT'}
           </button>
           <span className="playing-against">Playing against</span>
-          <span className="rival-user">{rivalUser}</span>
+          <span className="rival-user">{rivalUsername}</span>
         </div>
         <div className="timer-container">
           <div className="timer-bar">
@@ -207,16 +261,17 @@ const processSubmission = async () => {
       </div>
 
       <div className="gameplay-main-content">
-      <div className="problem-description">
-        {question ? (
-          <>
-            <h2>{question.title}</h2>
-            <p>{question.description}</p>
-          </>
-        ) : (
-          <p>Loading question...</p>
-        )}
-      </div>
+        <div className="problem-description">
+          {question ? (
+            <>
+              <h2>{question.title}</h2>
+              <p>{question.description}</p>
+            </>
+          ) : (
+            <p>Loading question...</p>
+          )}
+        </div>
+        
         <div className="code-editor">
           <div className="editor-header">
             <h2>Code Editor</h2>
@@ -230,7 +285,7 @@ const processSubmission = async () => {
           </div>
           <div className="editor-content">
             <CodeMirror
-              value={code||initialCode}
+              value={code}
               height="100%"
               theme={vscodeDark}
               extensions={[python()]}
@@ -250,17 +305,17 @@ const processSubmission = async () => {
               <p>Opponent's Score: {results.userBScore}</p>
               <h4>Winner: {results.winner}</h4>
             </div>
-            ) : (
-              <pre>{output}</pre>
-            )}
+          ) : (
+            <pre>{output}</pre>
+          )}
           </div>
         </div>
       </div>
-
-      <ConfirmationModal 
+      <ConfirmationModal
         isOpen={isModalOpen}
-        onConfirm={() => {
-            processSubmission(); 
+        onConfirm={async () => {
+          console.log("onConfirm triggered");
+          await processSubmission();
         }}
         onClose={() => setIsModalOpen(false)}
       />
@@ -268,4 +323,4 @@ const processSubmission = async () => {
   );
 };
 
-export default Gameplay;
+export default Gameplay
