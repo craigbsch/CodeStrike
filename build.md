@@ -43,9 +43,9 @@ docker build -t docker_python:latest .
 
 ## 8. Start the backend
  Run the following command to start the backend:
-    ```bash
+ ```bash
     node app.js
-    ``
+ ```
 # 9. In another terminal window, Navigate to the frontend Folder
 Change directories to the frontend folder:
 ```bash
