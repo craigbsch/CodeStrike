@@ -42,12 +42,13 @@ const Gameplay = () => {
   const [userData, setUserData] = useState({ name: '', email: '' });
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 
+// sets the username and rival username to display to users
   useEffect(() => {
     console.log('Username:', username);
     console.log('Opponent Username:', rivalUsername);
   }, [username, rivalUsername]);
 
-
+// helps gets the user data for use later
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -72,25 +73,25 @@ const Gameplay = () => {
   }, []);
 
 
-
+//allows for real time communication between two users 
   useEffect(() => {
     socketRef.current = io(SOCKET_SERVER_URL);
 
     socketRef.current.on('connect', () => {
         console.log('Connected to socket server:', socketRef.current.id);
     });
-
+// waits for two people to join the game before the match begins
     socketRef.current.on('waitingForOpponent', (data) => {
         console.log(data.message);
         setRivalUsername('Waiting for opponent...');
     });
-
+// once two people have joined the match starts
     socketRef.current.on('startMatch', (data) => {
       console.log('Match started with opponent (from gameplay file):', data.opponentUsername);
       setRivalUsername(data.opponentUsername || 'Unknown Opponent');
       console.log(`opponent is: ${rivalUsername}`)
   });
-
+// once the data is received and compared to the other submission, results are returned
   socketRef.current.on('matchResults', (data) => {
     console.log('Match results received:', data.resultsMessage);
     setOutput(data.resultsMessage);
@@ -101,7 +102,8 @@ const Gameplay = () => {
     };
 }, [matchId]);
 
-
+// fetches and displays question to users
+// we hope to expand this to randomize the questions
   useEffect(() => {
     const fetchQuestion = async () => {
       try {
@@ -119,6 +121,7 @@ const Gameplay = () => {
     fetchQuestion();
   }, []);
 
+// handles the timer and the timer running out
   useEffect(() => {
     let timer;
     if (time > 0 && !results) {
@@ -147,6 +150,8 @@ const Gameplay = () => {
     }
   }, [isEditorDisabled]);
 
+// when a user runs their code, it is compared with our test cases and returned to the user
+// calls the api endpoint to run their code in the docker container and uses the test inputs we provide
   const handleRun = async () => {
     setIsCodeRunning(true);
     setOutput('Executing code...');
@@ -185,6 +190,8 @@ const Gameplay = () => {
     setIsModalOpen(true); 
   };
 
+  // this handles the submissions where it calls the api endpoint and stores the information to be returned when the timer runs out
+  // this also makes it so that the editor is uneditable and the user can no longer submit or run their code
   const processSubmission = async () => {
     try {
         setOutput('Submitting code...');
@@ -226,7 +233,8 @@ const Gameplay = () => {
     }
 };
 
-
+// once both users submit their code and the timer runs out, the submissions are compares and whoever passed the most test cases, and then (if tie) looks at the execution times
+//returns the results and the winner to both users
 const fetchResults = async () => {
   try {
       const userATime = localStorage.getItem('executionTime') || 0;
@@ -260,11 +268,11 @@ useEffect(() => {
 
 
 
-
+// this is when both users join this is displayed as the transition screen
   if (isLoadingUser) {
     return <div>Loading user data...</div>;
   }
-
+// this is our layout and displays all the information, buttons, and page
   return (
     <div className="gameplay-container">
       <div className="header">
