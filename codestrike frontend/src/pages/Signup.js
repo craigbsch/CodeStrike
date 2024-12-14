@@ -15,6 +15,7 @@ function Signup() {
     const [submitted, setSubmitted] = useState(false);
     const navigate = useNavigate();
 
+    // validates the form and makes sure proper inputs are provided
     const validateForm = () => {
         const newErrors = {};
         if (!name) newErrors.name = 'Name is required';
@@ -28,25 +29,22 @@ function Signup() {
         return Object.keys(newErrors).length === 0;
     };
 
+    // handles the signup and works with the firebase authentication to ensure that everything is valid
     const handleSignup = async (e) => {
         e.preventDefault();
         
-        // First validate the form
         if (!validateForm()) {
             return;
         }
 
         try {
-            // Create user in Firebase Authentication
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            // Create user document in Firestore
             await setDoc(doc(db, "Users", user.uid), {
                 userName: name,
                 email: email,
                 createdAt: new Date(),
-                // You can add more initial user fields here
             });
 
             console.log("User registered successfully!!!");
@@ -58,7 +56,6 @@ function Signup() {
             setConfirmPassword('');
             setErrors({});
 
-            // Navigate after a short delay
             setTimeout(() => {
                 setSubmitted(false);
                 navigate('/homepage'); 
@@ -67,7 +64,6 @@ function Signup() {
         } catch (error) {
             console.error("Signup Error:", error);
             
-            // Handle specific Firebase errors
             if (error.code === 'auth/email-already-in-use') {
                 setErrors({email: 'Email is already in use'});
             } else {
@@ -75,11 +71,11 @@ function Signup() {
             }
         }
     };
-
+// if user chooses to signin instead of signup, the user is redirected to the signin page
     const handleSignin = () => {
         navigate('/signin');
     };
-
+// lays out the page formatting and presents the data to the user
     return (
         <div className="signup-page">
             <div className="App">
